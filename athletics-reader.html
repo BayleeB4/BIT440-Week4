@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap + Jquery Reader</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+<style>
+    #boxes { color: green;}
+
+    @media screen and (min-width: 992px) {
+        #boxes { color: Blue; }
+    }
+</style>
+</head>
+<body>
+
+    <!-- Image and text -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand d-none d-sm-block" href="#">
+                Atheltics Tracker
+            </a>
+            <form class="d-flex">
+                <select id='sport' class="form-select" aria-label="Select a sport">
+                    <option selected>Choose Sport</option>
+                    <option value="45">Bowling</option>
+                    <option value="22">Volleyball</option>
+                    <option value="48">Tennis</option>
+                </select>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div id='boxes' class="row d-flex justify-content-center">
+        </div>
+
+    </div>
+
+    <script>
+        var boxContainer = document.getElementById('boxes')
+        var sportSelect = document.getElementById('sport');
+
+        sportSelect.addEventListener('change', updateSport)
+
+        function updateSport(event) {
+            boxContainer.innerHTML = '<p>Loading...</p>';
+
+            loadContent(event.target.value);
+        }
+
+        function loadContent(categoryId) {
+            var url = "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.midlandathletics.com%2Frss.php"
+
+            if(categoryId) {
+                url += `?categoryID=${categoryId}`
+            }
+
+            fetch(url).then(function(response) {
+                return response.json();
+            }).then(function(data){
+                console.log(data.items);
+
+                var html = ''
+                data.items.forEach(function(item){
+                    html += `
+                        <div class="col-xl-3 col-md-6 col-sm-12 my-5 d-flex flex-column justify-content-between">
+                            <img class="img-responsive col-12" src="${item.thumbnail}" />
+                            <h1>${item.title}</h1>
+                            <p>${item.description.substring(0, 300)}...</p>
+
+                            <div class='d-grid'>
+                                <a href="${item.link}" class="btn btn-primary">Read more</a>
+                            </div>
+                        </div>
+                    `
+                })
+
+                boxContainer.innerHTML = html;
+
+            });
+        }
+
+        loadContent();
+
+    </script>
+
+</body>
+</html>
